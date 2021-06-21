@@ -49,7 +49,7 @@ def main():
     model = GPT2LMHeadModel.from_pretrained("distilgpt2")
     tokenizer.padding_side = "right" # Very Important
 
-    special_tokens_dict = {'pad_token': '<PAD>', 'additional_special_tokens': ["<|USER|>", "<|SYSTEM|>"]}
+    special_tokens_dict = {'pad_token': '<PAD>', 'additional_special_tokens': ["<|USER|>", "<|SYSTEM|>", "<|SEP|>"]}
     num_added_toks = tokenizer.add_special_tokens(special_tokens_dict)
     #print('We have added', num_added_toks, 'tokens')
     model.resize_token_embeddings(len(tokenizer))
