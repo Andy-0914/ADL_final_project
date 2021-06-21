@@ -100,14 +100,14 @@ def parse_args():
 		"--data_path",
 		type=str,
 		help="path to directory that stores data to be preprocessed",
-		default="../adl-final-dst-with-chit-chat-seen-domains/data-0614/data-0614/dev/",
+		default="../adl-final-dst-with-chit-chat-seen-domains/data-0614/data-0614/train/",
 	)
 
 	parser.add_argument(
 		"--num_data",
 		type=int,
 		help="number of json file to be preprocessed",
-		default=20,
+		default=138,
 		#train=138, dev=20
 	)
 
@@ -115,14 +115,14 @@ def parse_args():
 		"--mode",
 		type=str,
 		help="train, dev or test",
-		default="dev",
+		default="train",
 	)
 
 	parser.add_argument(
 		"--reduce_threshold",
 		type=float,
 		help="0 to 1, with 0 mean no reduce",
-		default=0.0
+		default=0.6
 	)
 
 	parser.add_argument(
