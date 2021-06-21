@@ -32,6 +32,8 @@ class DstDataset(torch.utils.data.Dataset):
 			#print('context: ', context)
 			encoder_inputs.append(context)
 
+		#print('encoder_inputs: ', encoder_inputs)
+
 
 		#print('encoder_context: ', enoceder_context)
 		#print('encoder_state: ', encoder_state)

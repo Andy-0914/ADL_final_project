@@ -50,26 +50,24 @@ def main():
 
 	accuracy_loss = 0
 	for num, batch_input in enumerate(tqdm(evalloader)):
+		#print('input: ', tokenizer.decode(batch_input['input_ids'][0]))
 		outputs = model.generate(batch_input['input_ids'].to(device), num_beams=1, max_length=1024,
 								 attention_mask=batch_input['attention_mask'].to(device))
-		outputs = tokenizer.batch_decode(outputs, skip_special_tokens=True)
+		#outputs = tokenizer.batch_decode(outputs, skip_special_tokens=True)
+		outputs = tokenizer.batch_decode(outputs, skip_special_tokens=False)
 		outputs = outputs[0]
 		#print('outputs: ', outputs)
-		outputs = outputs[outputs.find("<|SEP|>"):]
-
-		modified_output = "<|SEP|>"
+		outputs = outputs[outputs.find("<|SEP|>"): outputs.find("<|ENDOFTEXT|>")]
+		#print('after_outputs: ', modified_output)
+		outputs_dict = {}
 		for text in outputs.split("<|SEP|>"):
 			if "=" in text:
-				modified_output += text + "<|SEP|>"
-		#print('modified_output: ', modified_output)
+				text = text.strip()
+				outputs_dict[text[:text.find("=")]] = text[text.find("=")+1:]
 
-		ground_truth = eval_dataset[num]['belief'].items()
-		ground_truth_context = "<|SEP|>"
-		for state, value in ground_truth:
-			ground_truth_context += state + "=" + value + "<|SEP|>"
-
-
-		if ground_truth_context != modified_output:
+		if eval_dataset[num]['belief'] != outputs_dict:
+			print('ground_truth: ', eval_dataset[num]['belief'])
+			print('outputs_dict: ', outputs_dict)
 			accuracy_loss += 1
 
 		print('eval_loss: ', accuracy_loss)
@@ -103,7 +101,7 @@ def parse_args():
 	parser.add_argument(
 		"--model_checkpoint",
 		type=str,
-		default="./model/distilgpt2/checkpoint-8566"
+		default="./model/distilgpt2/checkpoint-14736"
 	)
 
 
