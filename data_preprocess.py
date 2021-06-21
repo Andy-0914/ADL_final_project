@@ -45,7 +45,7 @@ def main(args):
 			for turn in dialogue['turns']:
 				speaker = turn['speaker']
 				utternace = turn['utterance']
-				context += ("<|" + speaker + ">|" + utternace + "<|" + speaker + ">|")
+				context += ("<|" + speaker + "|>" + utternace + "<|" + speaker + "|>")
 
 				#track state only if USER is speaking
 				if speaker == 'USER':
