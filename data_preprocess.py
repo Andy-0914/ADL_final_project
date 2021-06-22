@@ -73,15 +73,17 @@ def main(args):
 					if belief and not args.last_context_only: #choose whether or not to reduce data size
 						if random.random() > args.reduce_threshold:
 							d = copy.deepcopy(belief)
-							turns_info.append({'context': context, 'belief': d})
+							turns_info.append({'context': context, 'belief': d, 'service': dialogue['services']})
 
 					elif belief and args.last_context_only:
 						if turn == dialogue['turns'][-2]:
 							d = copy.deepcopy(belief)
-							turns_info.append({'context': context, 'belief': d})
+							turns_info.append({'context': context, 'belief': d, 'service': dialogue['services']})
 
 			#add the entire dialogue's turn information into dialogue_info
 			dialogue_info['turns'] = turns_info
+			#print(dialogue_info)
+			#sys.exit()
 
 			if turns_info:
 				preprocessed_data.append(dialogue_info)
@@ -122,13 +124,13 @@ def parse_args():
 		"--reduce_threshold",
 		type=float,
 		help="0 to 1, with 0 mean no reduce",
-		default=0.0
+		default=0.5
 	)
 
 	parser.add_argument(
 		"--last_context_only",
 		type=bool,
-		default=False,
+		default=True,
 	)
 
 	args = parser.parse_args()

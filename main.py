@@ -46,13 +46,13 @@ def main():
 
 
 	tokenizer = GPT2Tokenizer.from_pretrained("distilgpt2")
-    model = GPT2LMHeadModel.from_pretrained("distilgpt2")
-    tokenizer.padding_side = "right" # Very Important
+	model = GPT2LMHeadModel.from_pretrained("distilgpt2")
+	tokenizer.padding_side = "right" # Very Important
 
-    special_tokens_dict = {'pad_token': '<PAD>', 'additional_special_tokens': ["<|USER|>", "<|SYSTEM|>", "<|SEP|>"]}
-    num_added_toks = tokenizer.add_special_tokens(special_tokens_dict)
-    #print('We have added', num_added_toks, 'tokens')
-    model.resize_token_embeddings(len(tokenizer))
+	special_tokens_dict = {'pad_token': '<PAD>', 'additional_special_tokens': ["<|USER|>", "<|SYSTEM|>", "<|SEP|>", "<|SERVICE|>", "<|ENDOFTEXT|>"]}
+	num_added_toks = tokenizer.add_special_tokens(special_tokens_dict)
+	#print('We have added', num_added_toks, 'tokens')
+	model.resize_token_embeddings(len(tokenizer))
 
 	dialogues = {}
 	for split in SPLITS:
@@ -76,7 +76,7 @@ def main():
 
 	training_args = TrainingArguments(
 		output_dir=args.output_dir,
-		num_train_epochs=2,
+		num_train_epochs=5,
 		per_device_train_batch_size=args.batch_size,
 		per_device_eval_batch_size=args.batch_size,
 		warmup_steps=500,
@@ -110,7 +110,7 @@ def parse_args():
 	parser.add_argument(
 		"--output_dir",
 		type=str,
-		default="./model/distilgpt2"
+		default="./model/distilgpt2_service"
 	)
 	parser.add_argument(
 		"--logging_dir",
