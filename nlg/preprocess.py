@@ -69,8 +69,8 @@ def main():
                     context4mc += speaker.lower() + ': '+ utterance + ' '
 
         random.shuffle(inlm)
-        # with open("lm.input1."+folder+".txt", "w", encoding='utf8') as f: #SimpleTOD
-        #     f.write('\n'.join(inlm))
+        with open("lm.input1."+folder+".txt", "w", encoding='utf8') as f: #SimpleTOD
+            f.write('\n'.join(inlm))
 
         with open("arranger_input." + folder + ".json", "w", encoding='utf8') as f:
             json.dump(inmc, f, indent=1)
