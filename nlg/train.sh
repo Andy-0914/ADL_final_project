@@ -1,0 +1,1 @@
+python3  run_language_modeling.py --output_dir gpt2_clm --model_type gpt2 --model_name_or_path gpt2 --do_train --train_file lm.input.train.txt --do_eval --validation_file lm.input.dev.txt --per_device_train_batch_size 2 --gradient_accumulation_steps 18 --num_train_epochs 10 --learning_rate 1e-3 --fp16 --overwrite_output_dir --prediction_loss_only
