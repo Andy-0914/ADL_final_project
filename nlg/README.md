@@ -25,7 +25,7 @@ python3 run_language_modeling.py \
 * **model_name_or_path**: Path to pretrained model or model identifier from huggingface.co/models (ex: gpt2)
 * **output_dir**: The output directory where the model predictions and checkpoints will be written. (ex: gpt2_clm)
 * **train_file**: The input training data file (a text file). (ex: ./lm.input.train.txt)
-* **validation_file**: The output directory where the model predictions and checkpoints will be written. (ex: ./lm.input.dev.txt)
+* **validation_file**: An optional input evaluation data file to evaluate the perplexity on (a text file). (ex: ./lm.input.dev.txt)
 
 ## train accentor
 ```
@@ -57,6 +57,6 @@ python ./run_multiple_choice.py \
 * **model_name_or_path**: Path to pretrained model or model identifier from huggingface.co/models (ex: roberta-base)
 * **output_dir**: The output directory where the model predictions and checkpoints will be written. (ex: arranger_roberta_base)
 * **train_file**: The input training data file (a text file). (ex: ./arranger_input.train.json)
-* **validation_file**: The output directory where the model predictions and checkpoints will be written. (ex: ./arranger_input.dev.json)
+* **validation_file**: An optional input evaluation data file to evaluate the perplexity on (a text file). (ex: ./arranger_input.dev.json)
 
 
