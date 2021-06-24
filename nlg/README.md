@@ -5,5 +5,58 @@ python preprocess.py --data <data>
 * **data**: your data path (ex: ../data/adl-final-dst-with-chit-chat-seen-domains/data-0614/data-0614)
 
 ## train clm
-see train.sh
+```
+python3 run_language_modeling.py \
+  --model_type <model_type> \
+  --model_name_or_path <model_name_or_path> \
+  --output_dir <output_dir> \
+  --train_file <train_file> \
+  --validation_file <validation_file> \
+  --do_train \
+  --do_eval \
+  --per_device_train_batch_size 2 \
+  --gradient_accumulation_steps 18 \
+  --num_train_epochs 10 \
+  --learning_rate 1e-3 \
+  --fp16 \
+  --prediction_loss_only \
+```
+* **model_type**: Model type from huggingface.co/models (ex: gpt2)
+* **model_name_or_path**: Path to pretrained model or model identifier from huggingface.co/models (ex: gpt2)
+* **output_dir**: The output directory where the model predictions and checkpoints will be written. (ex: gpt2_clm)
+* **train_file**: The input training data file (a text file). (ex: ./lm.input.train.txt)
+* **validation_file**: The output directory where the model predictions and checkpoints will be written. (ex: ./lm.input.dev.txt)
+
+## train accentor
+```
+python ./run_multiple_choice.py \
+  --model_name_or_path <model_name_or_path> \
+  --output_dir <output_dir> \
+  --train_file <train_file> \
+  --validation_file <validation_file> \
+  --do_train \
+  --do_eval \
+  --learning_rate 2e-5 \
+  --num_train_epochs 3 \
+  --max_seq_length 512 \
+  --per_device_train_batch_size 2 \
+  --gradient_accumulation_steps 12 \
+  --per_device_eval_batch_size 2 \
+  --eval_accumulation_steps 128 \
+  --logging_strategy steps \
+  --logging_steps 100 \
+  --evaluation_strategy steps \
+  --eval_steps 2000 \
+  --save_strategy steps \
+  --save_steps 2000 \
+  --save_total_limit 10 \
+  --warmup_ratio 0.1 \
+  --fp16 \
+```
+
+* **model_name_or_path**: Path to pretrained model or model identifier from huggingface.co/models (ex: roberta-base)
+* **output_dir**: The output directory where the model predictions and checkpoints will be written. (ex: arranger_roberta_base)
+* **train_file**: The input training data file (a text file). (ex: ./arranger_input.train.json)
+* **validation_file**: The output directory where the model predictions and checkpoints will be written. (ex: ./arranger_input.dev.json)
+
 
