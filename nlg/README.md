@@ -74,7 +74,10 @@ python run_generate.py \
   --model_name_or_path <model_name_or_path> \
   --data <data> \
   --output <output> \
-
+  [--temperature <temperature>] \
+  [--k <k>] \
+  [--p <p>] \
+  [--do_sample]
 ```
 
 * **model_name_or_path**: Path to model (ex: ./gpt2_clm/)
