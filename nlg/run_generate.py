@@ -20,6 +20,14 @@ parser.add_argument("--model_name_or_path", type=str, default="output", help="pa
 parser.add_argument("--data", type=str, default="../data/adl-final-dst-with-chit-chat-seen-domains/data-0614/data-0614/test_seen", help="path to data")
 parser.add_argument("--output", type=str, help="output file")
 parser.add_argument("--eos_token_id", type=int, default=None, help="eos token id")
+parser.add_argument(
+    "--temperature",
+    type=float,
+    default=1.0,
+    help="temperature of 1.0 has no effect, lower tend toward greedy sampling",
+)
+parser.add_argument("--k", type=int, default=0)
+parser.add_argument("--p", type=float, default=0.9)
 
 args = parser.parse_args()
 args.device = torch.device("cuda" if torch.cuda.is_available() and not args.no_cuda else "cpu")
@@ -53,7 +61,14 @@ for fn in tqdm(fns):
                 document = '<|endoftext|> <|context|> ' + context + ' <|endofcontext|> <|response|> ' + utterance + ' <|endofresponse|> <|chitchat|>'
                 input_ids = tokenizer(document, return_tensors="pt")
                 input_ids = { k: v.to(args.device) for k, v in input_ids.items() }
-                gen_output = model.generate(**input_ids, max_length=1024)
+                gen_output = model.generate(
+                    **input_ids, 
+                    temperature=args.temperature,
+                    top_k=args.k,
+                    top_p=args.p,
+                    do_sample=True,
+                    max_length=1024
+                )
                 gen_output = tokenizer.decode(gen_output[0], skip_special_tokens=False)
                 chitchat = gen_output.split('<|chitchat|>')[1].split('<|endofchitchat|>')[0]
 
