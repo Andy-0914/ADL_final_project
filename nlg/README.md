@@ -1,10 +1,13 @@
 ## preprocessing
+
 ```
 python preprocess.py --data <data>
 ```
+
 * **data**: your data path (ex: ../data/adl-final-dst-with-chit-chat-seen-domains/data-0614/data-0614)
 
 ## train clm
+
 ```
 python3 run_language_modeling.py \
   --model_type <model_type> \
@@ -21,6 +24,7 @@ python3 run_language_modeling.py \
   --fp16 \
   --prediction_loss_only \
 ```
+
 * **model_type**: Model type from huggingface.co/models (ex: gpt2)
 * **model_name_or_path**: Path to pretrained model or model identifier from huggingface.co/models (ex: gpt2)
 * **output_dir**: The output directory where the model predictions and checkpoints will be written. (ex: gpt2_clm)
@@ -28,6 +32,7 @@ python3 run_language_modeling.py \
 * **validation_file**: An optional input evaluation data file to evaluate the perplexity on (a text file). (ex: ./lm.input.dev.txt)
 
 ## train accentor
+
 ```
 python ./run_multiple_choice.py \
   --model_name_or_path <model_name_or_path> \
@@ -60,3 +65,34 @@ python ./run_multiple_choice.py \
 * **validation_file**: An optional input evaluation data file to evaluate the perplexity on (a text file). (ex: ./arranger_input.dev.json)
 
 
+## Chitchat generate
+
+Run generater
+
+```
+python run_generate.py \
+  --model_name_or_path <model_name_or_path> \
+  --data <data> \
+  --output <output> \
+
+```
+
+* **model_name_or_path**: Path to model (ex: ./gpt2_clm/)
+* **data**: path to data. (ex: ./data/test_seen/)
+* **output**: output file. (ex: ./test_seen_chitchat.json)
+
+Run accentor
+
+```
+python ./run_multiple_choice.py \
+  --model_name_or_path <model_name_or_path> \
+  --output_dir arranger_roberta_base/ \
+  --output_file <output_file> \
+  --test_file <test_file> \
+  --do_predict \
+  --max_seq_length 512 \
+```
+
+* **model_name_or_path**: Path to model (ex: ./arranger_roberta_base/)
+* **output_file**: path to data. (ex: ./nlp_output.json)
+* **test_file**: test file for accentor. (ex: ./test_seen_chitchat.json)
