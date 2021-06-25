@@ -28,8 +28,11 @@ parser.add_argument(
 )
 parser.add_argument("--k", type=int, default=0)
 parser.add_argument("--p", type=float, default=0.9)
+parser.add_argument("--do_sample", action="store_true")
 
 args = parser.parse_args()
+print(args)
+
 args.device = torch.device("cuda" if torch.cuda.is_available() and not args.no_cuda else "cpu")
 args.n_gpu = 0 if args.no_cuda else torch.cuda.device_count()
 datafolder = args.data
@@ -66,7 +69,7 @@ for fn in tqdm(fns):
                     temperature=args.temperature,
                     top_k=args.k,
                     top_p=args.p,
-                    do_sample=True,
+                    do_sample=args.do_sample,
                     max_length=1024
                 )
                 gen_output = tokenizer.decode(gen_output[0], skip_special_tokens=False)
@@ -75,9 +78,9 @@ for fn in tqdm(fns):
                 outputs['data'] += [{
                     'dialogue_id': dialogue['dialogue_id'],
                     'turn_id': turn['turn_id'],
-                    'context': context.replace('<|', '').replace('|>', ':'),
+                    'context': context.replace('<|', ' ').replace('|>', ':'),
                     'response': utterance,
-                    'chitchat': chitchat
+                    'chitchat': chitchat.strip()
                 }]
 
             context += '<|' + speaker.lower() + '|> ' + utterance
