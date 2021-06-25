@@ -370,7 +370,7 @@ def main():
         if answer_name in examples.keys():
             tokenized_inputs['label'] = [answer for answer in examples[answer_name]]
         else:
-            tokenized_inputs['label'] = [0 for _ in examples]
+            tokenized_inputs['label'] = [0 for _ in examples[context_name]]
         return tokenized_inputs
 
     if training_args.do_train:
@@ -475,10 +475,11 @@ def main():
         preds = np.argmax(results.predictions, axis=1)
         output_json = {}
         for i, pred in enumerate(tqdm(preds)):
-            output_json[test_dataset['dialogue_id'][i]] = {}
+            if test_dataset['dialogue_id'][i] not in output_json:
+                output_json[test_dataset['dialogue_id'][i]] = {}
             output_json[test_dataset['dialogue_id'][i]][test_dataset['turn_id'][i]] = {
-                'start': test_dataset['chitchat'] if pred == 0 else '', 
-                'end': test_dataset['chitchat'] if pred == 2 else '', 
+                'start': test_dataset['chitchat'][i] if pred == 0 else '', 
+                'end': test_dataset['chitchat'][i] if pred == 2 else '', 
                 'mod': ''
             }
         json.dump(output_json, open(data_args.output_file, 'w',encoding='utf-8'), indent=2, ensure_ascii=False)
