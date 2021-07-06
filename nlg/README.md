@@ -77,12 +77,18 @@ python run_generate.py \
   [--temperature <temperature>] \
   [--k <k>] \
   [--p <p>] \
-  [--do_sample]
+  [--num_beams <num_beams>] \
+  [--do_sample] \
 ```
 
 * **model_name_or_path**: Path to model (ex: ./gpt2_clm/)
 * **data**: path to data. (ex: ./data/test_seen/)
 * **output**: output file. (ex: ./test_seen_chitchat.json)
+* **num_beams**: Number of beams to use for decoding. EX: 5
+* **k**: The number of highest probability vocabulary tokens to keep for top-k-filtering. EX: 50
+* **p**: If set to float < 1, only the most probable tokens with probabilities that add up to top_p or higher are kept for generation. EX: 0.9
+* **temperature**: The value used to module the next token probabilities. EX: 0.75
+* **do_sample**: Whether or not to use sampling ; use greedy decoding otherwise.
 
 Run accentor
 
@@ -99,3 +105,26 @@ python ./run_multiple_choice.py \
 * **model_name_or_path**: Path to model (ex: ./arranger_roberta_base/)
 * **output_file**: path to data. (ex: ./nlp_output.json)
 * **test_file**: test file for accentor. (ex: ./test_seen_chitchat.json)
+
+## Reproduce our result
+```
+bash download.sh
+
+python run_generate.py \
+  --model_name_or_path gpt2_clm \
+  --data <data> \
+  --output test_seen_chitchat.json \
+  --num_beams 3
+
+python run_multiple_choice.py \
+  --model_name_or_path arranger_roberta_base/checkpoint-12000 \
+  --output_dir arranger_roberta_base/ \
+  --output_file <output_file> \
+  --test_file test_seen_chitchat.json \
+  --do_predict \
+  --max_seq_length 512 \
+  --per_device_eval_batch_size 4 
+```
+
+* **data**: path to data. (ex: ./data/test_seen/)
+* **output_file**: path to data. (ex: ./nlp_output.json)
