@@ -28,6 +28,7 @@ parser.add_argument(
 )
 parser.add_argument("--k", type=int, default=0)
 parser.add_argument("--p", type=float, default=0.9)
+parser.add_argument("--num_beams", type=int, default=1)
 parser.add_argument("--do_sample", action="store_true")
 
 args = parser.parse_args()
@@ -67,6 +68,7 @@ for fn in tqdm(fns):
                 gen_output = model.generate(
                     **input_ids, 
                     temperature=args.temperature,
+                    num_beams=args.num_beams,
                     top_k=args.k,
                     top_p=args.p,
                     do_sample=args.do_sample,
