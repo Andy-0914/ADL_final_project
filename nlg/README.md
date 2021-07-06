@@ -117,13 +117,20 @@ python run_generate.py \
   --num_beams 3
 
 python run_multiple_choice.py \
-  --model_name_or_path arranger_roberta_base/checkpoint-12000 \
+  --model_name_or_path arranger_roberta_base/ \
   --output_dir arranger_roberta_base/ \
   --output_file <output_file> \
   --test_file test_seen_chitchat.json \
   --do_predict \
   --max_seq_length 512 \
   --per_device_eval_batch_size 4 
+```
+
+or 
+
+```
+bash download.sh
+bash run_nlg.sh <data> <output_file>
 ```
 
 * **data**: path to data. (ex: ./data/test_seen/)
