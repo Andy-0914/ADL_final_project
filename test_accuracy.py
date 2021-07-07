@@ -90,14 +90,14 @@ def main():
 				outputs_dict[text[:text.find("=")]] = text[text.find("=")+1:]
 
 		#print('eval_dataset: ', eval_dataset[num]['turns'][0])
-		#print('outputs_dict: ', outputs_dict)
+		print('outputs_dict: ', outputs_dict)
 		#continue
 		#print('eval: ', eval_dataset[num]['turns'][0])
 
-		if eval_dataset[num]['turns'][0]['belief'] != outputs_dict:
+		"""if eval_dataset[num]['turns'][0]['belief'] != outputs_dict:
 			print('ground_truth: ', eval_dataset[num]['turns'][0]['belief'])
 			print('outputs_dict: ', outputs_dict)
-			accuracy_loss += 1
+			accuracy_loss += 1"""
 
 		outputs_dict = {}
 		for text in outputs.split("<|SEP|>"):
@@ -106,7 +106,7 @@ def main():
 				outputs_dict[text[:text.find(" ")] + "-" + text[text.find(" ")+1:text.find("=")]] = text[text.find("=")+1:]
 
 		ans[eval_dataset[num]['id']] = outputs_dict
-		print('eval_loss: ', accuracy_loss)
+		#print('eval_loss: ', accuracy_loss)
 
 		#print('after_output_dict: ', outputs_dict)
 
@@ -114,7 +114,7 @@ def main():
 		#if count == 3:
 		#	break
 
-	print(accuracy_loss / len(evalloader))
+	#print(accuracy_loss / len(evalloader))
 
 
 	with open("submission.json", 'w', encoding='utf-8') as json_file:
