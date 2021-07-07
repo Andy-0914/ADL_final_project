@@ -21,11 +21,11 @@ class DstEvalDataset(torch.utils.data.Dataset):
 		samples = samples[0]['turns']
 		#print(samples)
 		for sample in samples:
-			context = "<|ENDOFTEXT|>" + sample['context'] + "<|SERVICE|>"
-			services = sample['service']
-			for service in services:
-				context += service + "<|SERVICE|>"
-			encoder_inputs.append(context + "<|SEP|>")
+			#print('sample: ', sample)
+			#sys.exit()
+			context = sample['context'] + "<|SERVICE|>" + sample['service'] + "<|ENDOFSERVICE|>" + "<|BELIEF|>" + "<|SEP|>"
+
+			encoder_inputs.append(context)
 		#print('encoder_inputs: ', encoder_inputs)
 		#sys.exit()
 

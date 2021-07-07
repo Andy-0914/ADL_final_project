@@ -6,40 +6,31 @@ class DstDataset(torch.utils.data.Dataset):
 		self.data = data
 		self.tokenizer = tokenizer
 
-		#print('data: ', self.data)
-		#enoceder_context = [sample['context'] for sample in self.data]
-		#encoder_state = [sample['belief'] for sample in self.data]
-
-
 	def __getitem__(self, idx):
 		return self.data[idx]
-
 
 	def __len__(self):
 		return len(self.data)
 
-
 	def collate_fn(self, samples):
-		#enoceder_context = [sample['context'] for sample in samples]
-		#encoder_state = [sample['belief'] for sample in samples]
-		#encoder_inputs = [sample['context']+sample['belief'] for sample in samples]
 		encoder_inputs = []
 		for sample in samples:
 			#print('sample: ', sample)
-			context = "<|ENDOFTEXT|>" + sample['context'] + "<|SERVICE|>"
-
-			services = sample['service']
-			#print(services)
-
-			for service in services:
-				context += service + "<|SERVICE|>" 
-			context += "<|SEP|>"
+			context = "<|ENDOFTEXT|>" + sample['context']
+			context += "<|SERVICE|>" + sample['service'] + "<|ENDOFSERVICE|>"
+			context += "<|BELIEF|><|SEP|>"
+			#context += sample['service'] + "<|SEP|>"
 
 			dict_item = sample['belief'].items()
 			for state, value in dict_item:
 				context += state + "=" + value + "<|SEP|>"
 			#print('context: ', context)
+			#sys.exit()
+			context += "<|ENDOFBELIEF|>" + sample['response']
+			#print('context: ', context)
 			encoder_inputs.append(context + "<|ENDOFTEXT|>")
+			print('context: ', encoder_inputs[0])
+			sys.exit()
 
 
 		encoder_inputs = self.tokenizer(encoder_inputs, return_tensors="pt", padding=True, truncation=True, max_length=1024)

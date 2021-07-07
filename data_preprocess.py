@@ -10,17 +10,50 @@ import pickle
 import random
 
 logging.basicConfig(
-    format="%(asctime)s | %(levelname)s | %(message)s",
-    level=logging.INFO,
-    datefmt="%Y-%m-%d %H:%M:%S",
+	format="%(asctime)s | %(levelname)s | %(message)s",
+	level=logging.INFO,
+	datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-def get_all_context(dialogue):
-	all_context = ""
+def get_user_context(dialogue):
+	user_context = ""
 	for turn in dialogue['turns']:
-		utternace = turn['utterance']
-		all_context += utternace
-	return all_context
+		if turn['speaker'] == 'USER':
+			utternace = turn['utterance']
+			user_context += utternace
+	return user_context
+
+def get_system_context(dialogue):
+	system_context = ""
+	for turn in dialogue['turns']:
+		if turn['speaker'] == 'SYSTEM':
+			utternace = turn['utterance']
+			system_context += utternace
+	return system_context
+
+def get_schema(args):
+	with open(args.schema_data_path) as json_file:
+		schema = json.load(json_file)
+	#print(schema[0])
+	return schema
+
+def get_service(schema, target_service):
+	for service in schema:
+		if service['service_name'] == target_service:
+			#exteract service information
+			context = "<|SLOT|>"
+			for slot in service['slots']:
+				context += target_service + " " + slot['name'] + "<|SLOT|>"
+				#+ " description: " + slot['description'] + "<|SLOT|>"
+			#context += "<|SERVICE|>"
+			return context
+
+def get_tracking_service(schema, used_service):
+	context = ""
+	for service in used_service:
+		#print(type(get_service(schema,service)))
+		context += get_service(schema, service)
+	return context
 
 def main(args):
 	preprocess_data_path = "./preprocessed_data/"
@@ -28,10 +61,13 @@ def main(args):
 	preprocessed_data = []
 
 	data_path = args.data_path
+	schema = get_schema(args)
+
 	for i in tqdm(range(args.num_data)):
 		dialogue_path = args.data_path + "dialogues_" + str(i+1).zfill(3) + ".json"
 		with open(dialogue_path) as json_file:
 			dialogues = json.load(json_file) #A dialogue file is now loaded
+
 
 		for dialogue in dialogues: #get dialogue one by one
 			dialogue_info = {}
@@ -40,45 +76,96 @@ def main(args):
 			context = ""
 			belief={}
 			turns_info = []
-			all_context = get_all_context(dialogue)
+			used_service = []
+			user_context = get_user_context(dialogue)
+			system_context = get_system_context(dialogue)
 
 			for turn in dialogue['turns']:
 				speaker = turn['speaker']
 				utternace = turn['utterance']
-				context += ("<|" + speaker + "|>" + utternace + "<|" + speaker + "|>")
+				#print(turn)
+				#sys.exit("ds")
 
 				#track state only if USER is speaking
 				if speaker == 'USER':
-					try:
-						service = turn['frames'][0]['service']
-					except:
-						#End of dialogue
-						break
+					context += ("<|" + speaker + "|>" + utternace + "<|" + speaker + "|>")
+					belief = {}
+					for frame in turn['frames']:
+						#print('frame: ', frame)
+						try:
+							service = frame['service']
+							if service not in used_service:
+								used_service.append(service)
+						except:
+							#End of dialogue
+							break
 
-					slot_values = turn['frames'][0]['state']['slot_values']
-					for name, word_list in slot_values.items():
-						#Case with multiple reference
-						if len(word_list) > 1:
-							for word in word_list:
-								if word in all_context or word in all_context.lower(): #add this to belief
-									belief[service+"-"+name] = word
-									break
-								if word == word_list[-1]:
-									raise ValueError("no word in word_list belongs to context")
-						#Case without multiple reference
-						else:
-							belief[service+"-"+name] = word_list[0]
+						slot_values = frame['state']['slot_values']
+						for name, word_list in slot_values.items():
+							#Case with multiple reference
+							if len(word_list) > 1:
+								for word in word_list:
+									if word in user_context: #add this to belief
+										belief[service+" "+name] = word
+										break
+									elif word in user_context.lower():
+										belief[service+" "+name] = word
+										break
+									elif word in system_context:
+										belief[service+" "+name] = word
+										break
+									elif word in system_context.lower():
+										belief[service+" "+name] = word
+										break
 
-					#After updating belief state, if belief dict is not empty, we can store the value
-					if belief and not args.last_context_only: #choose whether or not to reduce data size
+									if word == word_list[-1]:
+										raise ValueError("no word in word_list belongs to context")
+							#Case without multiple reference
+							else:
+								belief[service+" "+name] = word_list[0]
+
+
+				#speaker is system
+				else:
+					response = utternace
+					action = ''
+					for frame in turn['frames']:
+						service = frame['service']
+						for act in frame['actions']:
+							action += service + ' ' + act['act'].lower() + ' ' + act['slot'] + ' , '
+
+					action = action[:-2]
+					if not args.last_context_only: #choose whether or not to reduce data size
 						if random.random() > args.reduce_threshold:
 							d = copy.deepcopy(belief)
-							turns_info.append({'context': context, 'belief': d, 'service': dialogue['services']})
+							#print('system belief: ', belief)
+							belief_service = [name[:name.find(' ')] for name, value in belief.items()]
+							belief_service = dialogue['services']
+							#print('belief service: ', belief_service)
+							#sys.exit()
+							ref_service = get_tracking_service(schema, belief_service)
+							#print('ref_service: ', ref_service)
+							turns_info.append({'context':'<|CONTEXT|>'+context+'<|ENDOFCONTEXT|>',
+												'belief': belief,
+												'service': ref_service,
+												'response': '<|RESPONSE|>'+response+'<|ENDOFRESPONSE|>'})
+							#tracking_service = get_tracking_service(schema, used_service)
+							#turns_info.append({'context': context, 'belief': d, 'service': tracking_service})
 
-					elif belief and args.last_context_only:
-						if turn == dialogue['turns'][-2]:
+					elif args.last_context_only:
+						if turn == dialogue['turns'][-1]:
 							d = copy.deepcopy(belief)
-							turns_info.append({'context': context, 'belief': d, 'service': dialogue['services']})
+							belief_service = dialogue['services']
+							ref_service = get_tracking_service(schema, belief_service)
+							turns_info.append({'context':'<|CONTEXT|>'+context+'<|ENDOFCONTEXT|>',
+												'belief': belief,
+												'service': ref_service,
+												'response': '<|RESPONSE|>'+response+'<|ENDOFRESPONSE|>'})
+
+					context += ("<|" + speaker + "|>" + utternace + "<|" + speaker + "|>")
+
+
+
 
 			#add the entire dialogue's turn information into dialogue_info
 			dialogue_info['turns'] = turns_info
@@ -89,6 +176,7 @@ def main(args):
 				preprocessed_data.append(dialogue_info)
 				#print(dialogue_info)
 
+	#print('data: ', preprocessed_data[0])
 	print('len: ', len(preprocessed_data))
 	with open(preprocess_data_path+"{}.pkl".format(args.mode), 'wb') as f:
 		pickle.dump(preprocessed_data, f)
@@ -102,7 +190,7 @@ def parse_args():
 		"--data_path",
 		type=str,
 		help="path to directory that stores data to be preprocessed",
-		default="../adl-final-dst-with-chit-chat-seen-domains/data-0614/data-0614/dev/",
+		default="../adl-final-dst-with-chit-chat-seen-domains/data-0625/data-0625/dev/",
 	)
 
 	parser.add_argument(
@@ -124,13 +212,19 @@ def parse_args():
 		"--reduce_threshold",
 		type=float,
 		help="0 to 1, with 0 mean no reduce",
-		default=0.5
+		default=0.6
 	)
 
 	parser.add_argument(
 		"--last_context_only",
 		type=bool,
 		default=True,
+	)
+
+	parser.add_argument(
+		"--schema_data_path",
+		type=str,
+		default="../adl-final-dst-with-chit-chat-seen-domains/data/data/schema.json"
 	)
 
 	args = parser.parse_args()
