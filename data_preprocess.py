@@ -218,7 +218,7 @@ def parse_args():
 	parser.add_argument(
 		"--last_context_only",
 		type=bool,
-		default=True,
+		default=False,
 	)
 
 	parser.add_argument(
